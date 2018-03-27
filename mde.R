@@ -45,7 +45,7 @@ ggplot() +
 
 super_feature <- rbinom(n_rep, n/2, p_effect)/(n/2)
 dt_super_and_useless_feature <- data.table(useless_feature_distr = useless_feature - base_rate,
-							   super_feature_distr = super_feature - base_rate) %>% 
+							   			   super_feature_distr = super_feature - base_rate) %>% 
 	melt(measure.vars = c("useless_feature_distr", "super_feature_distr"))
 
 ggplot() +
@@ -68,7 +68,7 @@ ggplot() +
 	annotate("text", x = (p_effect - p)/2, y = 15, label = "Measured Effect", vjust = -1) +
 	ggtitle("Distribution of Detectable Effects",
 			subtitle = glue("n = {n}"))
-	
+
 
 # MDE distribution --------------------------------------------------------
 
@@ -94,3 +94,26 @@ ggplot(mde_dist, aes(x = n, y = MDE)) +
 # calculate MDE for current sample size -----------------------------------
 
 mde <- calculateMinimumDetectableEffect(p, n, alpha = alpha, beta = beta)
+
+mde_feature <- rbinom(n_rep, n/2, p + mde)/(n/2)
+dt_mde_and_useless_feature <- data.table(useless_feature_distr = useless_feature - base_rate,
+							   			 mde_feature_distr = mde_feature - base_rate) %>% 
+	melt(measure.vars = c("useless_feature_distr", "mde_feature_distr"))
+
+ggplot() +
+	geom_density(data = dt_mde_and_useless_feature, 
+		aes(x = value, fill = variable, color = variable), alpha = 0.5) +
+	scale_fill_manual(values = c("lightgreen", "lightblue"), 
+					  labels = c("useless feature", "MDE = effect of super feature")) +
+	scale_color_manual(values = c("lightgreen", "lightblue"), guide = FALSE) +
+	scale_x_continuous(labels = scales::percent, breaks = seq(-0.02, 0.04, 0.01)) +
+	labs(x = "open rate difference (%)", y = NULL, fill = NULL) + 
+	theme(axis.text.y=element_blank(),
+		  axis.ticks.y = element_blank()) + 
+	geom_vline(xintercept = 0, color = "darkgreen", linetype = "dashed") + 
+	geom_vline(xintercept = mde, color = "darkblue", linetype = "dashed") + 
+	geom_vline(xintercept = critival_value, color = "red") +
+	annotate("text", x = critival_value, y = 0, label = "Critical value", 
+			 hjust = 0, vjust = 1, angle = 90) +
+	ggtitle("Distribution of Detectable Effects",
+			subtitle = glue("n = {n}"))
