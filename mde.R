@@ -3,83 +3,31 @@ library(dplyr)
 library(ggplot2)
 library(glue)
 
+source("tools.R")
+
+
 # initial params ----------------------------------------------------------
 
 n_rep <- 10^5
 p <- 0.1
 p_effect <- 0.11
-n <- 10000
+n <- 10^4
 
 alpha <- 0.05
 beta <- 0.2
 
 # plot effects ------------------------------------------------------------
 
-base_rate <- rbinom(n_rep, n/2, p)/(n/2)
-useless_feature <- rbinom(n_rep, n/2, p)/(n/2)
+dt_useless_and_super_feature <- createDetecteableEffectsForFeatures()
+critical_value <- calculateCriticalValue(dt_useless_and_super_feature)
 
-dt_useless_feature <- data.table(useless_feature_distr = useless_feature - base_rate)
+plotUselessFeature(dt_useless_and_super_feature[variable == "useless_feature"])
 
-critival_value <- dt_useless_feature[, quantile(useless_feature_distr, 1 - alpha/2)]
+plotUselessAndSuperFeature(dt_useless_and_super_feature)
 
-ggplot() + 
-	geom_density(data = dt_useless_feature, 
-		aes(x = useless_feature_distr, alpha = 0.5), 
-		color = "lightgreen", fill = "lightgreen") + 
-	scale_x_continuous(labels = scales::percent, breaks = seq(-0.02, 0.04, 0.01)) +
-	labs(x = "open rate difference (%)", y = NULL, fill = NULL) + 
-	theme(axis.text.y = element_blank(),
-		  axis.ticks.y = element_blank(),
-		  legend.position = "none") + 
-	geom_vline(xintercept = 0, color = "darkgreen", linetype = "dashed") + 
-	geom_vline(xintercept = p_effect - p, color = "darkblue", linetype = "dashed") + 
-	geom_vline(xintercept = critival_value, color = "red") +
-	annotate("text", x = critival_value, y = 0, label = "Critical value", 
-			 hjust = 0, vjust = 1, angle = 90) + 
-	geom_segment(aes(x = 0, xend = p_effect - p, y = 15, yend = 15),
-				 	 arrow = arrow(length=unit(0.30, "cm"), ends = "both", type = "closed")) +
-	annotate("text", x = (p_effect - p)/2, y = 15, label = "Measured Effect", vjust = -1) +
-	ggtitle("Distribution of Detectable Effects when there is actually no difference in open rates",
-			subtitle = glue('n = {format(n, scientific = FALSE, big.mark = ",")}'))
-	
-
-super_feature <- rbinom(n_rep, n/2, p_effect)/(n/2)
-dt_super_and_useless_feature <- data.table(useless_feature_distr = useless_feature - base_rate,
-							   			   super_feature_distr = super_feature - base_rate) %>% 
-	melt(measure.vars = c("useless_feature_distr", "super_feature_distr"))
-
-ggplot() +
-	geom_density(data = dt_super_and_useless_feature, 
-		aes(x = value, fill = variable, color = variable), alpha = 0.5) +
-	scale_fill_manual(values = c("lightgreen", "lightblue"), 
-					  labels = c("useless feature", "super feature")) +
-	scale_color_manual(values = c("lightgreen", "lightblue"), guide = FALSE) +
-	scale_x_continuous(labels = scales::percent, breaks = seq(-0.02, 0.04, 0.01)) +
-	labs(x = "open rate difference (%)", y = NULL, fill = NULL) + 
-	theme(axis.text.y = element_blank(),
-		  axis.ticks.y = element_blank()) + 
-	geom_vline(xintercept = 0, color = "darkgreen", linetype = "dashed") + 
-	geom_vline(xintercept = p_effect - p, color = "darkblue", linetype = "dashed") + 
-	geom_vline(xintercept = critival_value, color = "red") +
-	annotate("text", x = critival_value, y = 0, label = "Critical value", 
-			 hjust = 0, vjust = 1, angle = 90) + 
-	geom_segment(aes(x = 0, xend = p_effect - p, y = 15, yend = 15), 
-				 	 arrow = arrow(length=unit(0.30, "cm"), ends = "both", type = "closed")) +
-	annotate("text", x = (p_effect - p)/2, y = 15, label = "Measured Effect", vjust = -1) +
-	ggtitle("Distribution of Detectable Effects",
-			subtitle = glue('n = {format(n, scientific = FALSE, big.mark = ",")}'))
-
-
-mde <- calculateMinimumDetectableEffect(p, n, alpha = alpha, beta = beta)
+calculateMinimumDetectableEffect(p, n, alpha = alpha, beta = beta)
 
 # MDE distribution --------------------------------------------------------
-
-calculateMinimumDetectableEffect <- function(p1, n, prop_of_treatment = 0.5, alpha = 0.05, beta = 0.2) {
-    M <- qt(1-alpha/2, n - 1) + qt(1-beta, n - 1)
-    variance <- p1 * (1 - p1)
-    weight <- prop_of_treatment * (1 - prop_of_treatment) * n
-    M * sqrt(variance / weight)
-}
 
 n_seq <- seq.int(1000, 100000, by = 100)
 mde_dist <- data.table(n = n_seq, MDE = calculateMinimumDetectableEffect(p, n_seq, alpha = alpha, beta = beta))
@@ -93,75 +41,20 @@ ggplot(mde_dist, aes(x = n, y = MDE)) +
 		 x = "sample size", y = "Minimum Detectable Effect (%)")
 
 
-# calculate MDE for with larger sample size -------------------------------
+# calculate MDE with larger sample sizes ---------------------------------
 
 n <- 30000
 
-base_rate <- rbinom(n_rep, n/2, p)/(n/2)
-useless_feature <- rbinom(n_rep, n/2, p)/(n/2)
+dt_useless_and_super_feature <- createDetecteableEffectsForFeatures(sample_size = n)
+critical_value <- calculateCriticalValue(dt_useless_and_super_feature)
 
-dt_useless_feature <- data.table(useless_feature_distr = useless_feature - base_rate)
-
-critival_value <- dt_useless_feature[, quantile(useless_feature_distr, 1 - alpha/2)]
-
-super_feature <- rbinom(n_rep, n/2, p_effect)/(n/2)
-dt_super_and_useless_feature <- data.table(useless_feature_distr = useless_feature - base_rate,
-							   			   super_feature_distr = super_feature - base_rate) %>% 
-	melt(measure.vars = c("useless_feature_distr", "super_feature_distr"))
-
-ggplot() +
-	geom_density(data = dt_super_and_useless_feature, 
-		aes(x = value, fill = variable, color = variable), alpha = 0.5) +
-	scale_fill_manual(values = c("lightgreen", "lightblue"), 
-					  labels = c("useless feature", "super feature")) +
-	scale_color_manual(values = c("lightgreen", "lightblue"), guide = FALSE) +
-	scale_x_continuous(labels = scales::percent, breaks = seq(-0.02, 0.04, 0.01)) +
-	labs(x = "open rate difference (%)", y = NULL, fill = NULL) + 
-	theme(axis.text.y = element_blank(),
-		  axis.ticks.y = element_blank()) + 
-	geom_vline(xintercept = 0, color = "darkgreen", linetype = "dashed") + 
-	geom_vline(xintercept = p_effect - p, color = "darkblue", linetype = "dashed") + 
-	geom_vline(xintercept = critival_value, color = "red") +
-	annotate("text", x = critival_value, y = 0, label = "Critical value", 
-			 hjust = 0, vjust = 1, angle = 90) + 
-	geom_segment(aes(x = 0, xend = p_effect - p, y = 15, yend = 15), 
-				 	 arrow = arrow(length=unit(0.30, "cm"), ends = "both", type = "closed")) +
-	annotate("text", x = (p_effect - p)/2, y = 15, label = "Measured Effect", vjust = -1) +
-	ggtitle("Distribution of Detectable Effects",
-			subtitle = glue('n = {format(n, scientific = FALSE, big.mark = ",")}'))
+plotUselessAndSuperFeature(dt_useless_and_super_feature)
 
 
 n <- 200000
 
-base_rate <- rbinom(n_rep, n/2, p)/(n/2)
-useless_feature <- rbinom(n_rep, n/2, p)/(n/2)
+dt_useless_and_super_feature <- createDetecteableEffectsForFeatures(sample_size = n)
+critical_value <- calculateCriticalValue(dt_useless_and_super_feature)
 
-dt_useless_feature <- data.table(useless_feature_distr = useless_feature - base_rate)
+plotUselessAndSuperFeature(dt_useless_and_super_feature)
 
-critival_value <- dt_useless_feature[, quantile(useless_feature_distr, 1 - alpha/2)]
-
-super_feature <- rbinom(n_rep, n/2, p_effect)/(n/2)
-dt_super_and_useless_feature <- data.table(useless_feature_distr = useless_feature - base_rate,
-							   			   super_feature_distr = super_feature - base_rate) %>% 
-	melt(measure.vars = c("useless_feature_distr", "super_feature_distr"))
-
-ggplot() +
-	geom_density(data = dt_super_and_useless_feature, 
-		aes(x = value, fill = variable, color = variable), alpha = 0.5) +
-	scale_fill_manual(values = c("lightgreen", "lightblue"), 
-					  labels = c("useless feature", "super feature")) +
-	scale_color_manual(values = c("lightgreen", "lightblue"), guide = FALSE) +
-	scale_x_continuous(labels = scales::percent, breaks = seq(-0.02, 0.04, 0.01)) +
-	labs(x = "open rate difference (%)", y = NULL, fill = NULL) + 
-	theme(axis.text.y = element_blank(),
-		  axis.ticks.y = element_blank()) + 
-	geom_vline(xintercept = 0, color = "darkgreen", linetype = "dashed") + 
-	geom_vline(xintercept = p_effect - p, color = "darkblue", linetype = "dashed") + 
-	geom_vline(xintercept = critival_value, color = "red") +
-	annotate("text", x = critival_value, y = Inf, label = "Critical value", 
-			 hjust = 1, vjust = 1, angle = 90) + 
-	geom_segment(aes(x = 0, xend = p_effect - p, y = 15, yend = 15), 
-				 	 arrow = arrow(length=unit(0.30, "cm"), ends = "both", type = "closed")) +
-	annotate("text", x = (p_effect - p)/2, y = 15, label = "Measured Effect", vjust = -1) +
-	ggtitle("Distribution of Detectable Effects",
-			subtitle = glue('n = {format(n, scientific = FALSE, big.mark = ",")}'))
