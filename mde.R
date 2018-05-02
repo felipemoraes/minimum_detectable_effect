@@ -21,6 +21,8 @@ beta <- 0.2
 dt_useless_and_super_feature <- createDetecteableEffectsForFeatures()
 critical_value <- calculateCriticalValue(dt_useless_and_super_feature)
 
+plotDetectableEffects(dt_useless_and_super_feature[variable == "useless_feature"])
+
 plotUselessFeature(dt_useless_and_super_feature[variable == "useless_feature"])
 
 plotUselessAndSuperFeature(dt_useless_and_super_feature)

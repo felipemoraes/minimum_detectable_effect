@@ -19,7 +19,22 @@ calculateCriticalValue <- function(dt_useless_and_super_feature) {
     dt_useless_and_super_feature[variable == "useless_feature", quantile(value, 1 - alpha/2)]
 }
 
-plotUselessFeature <- function(dt_useless_feature, criticalValue = critical_value, base_rate = p, effect_rate = p_effect) {
+plotDetectableEffects <- function(dt_useless_feature, num_contact = n) {
+    ggplot() + 
+        geom_density(data = dt_useless_feature, 
+            aes(x = value, alpha = 0.5), 
+            color = "lightgreen", fill = "lightgreen") + 
+        scale_x_continuous(labels = scales::percent, breaks = seq(-0.02, 0.04, 0.01)) +
+        labs(x = "open rate difference (%)", y = NULL, fill = NULL) + 
+        theme(axis.text.y = element_blank(),
+              axis.ticks.y = element_blank(),
+              legend.position = "none") + 
+        geom_vline(xintercept = 0, color = "darkgreen", linetype = "dashed") +
+        ggtitle("Distribution of Detectable Effects when there is actually no difference in open rates",
+                subtitle = glue('n = {format(num_contact, scientific = FALSE, big.mark = ",")}'))
+}
+
+plotUselessFeature <- function(dt_useless_feature, criticalValue = critical_value, base_rate = p, effect_rate = p_effect, num_contact = n) {
     ggplot() + 
         geom_density(data = dt_useless_feature, 
             aes(x = value, alpha = 0.5), 
