@@ -1,4 +1,6 @@
-createDetecteableEffectsForFeatures <- function(base_rate = p, effect_rate = p_effect, sample_size = n, num_repl = n_rep) {
+createDetecteableEffectsForFeatures <- function(base_rate = p, effect_rate = p_effect, sample_size = n, num_repl = n_rep, seed = 123) {
+    set.seed(seed)
+
     base_rate_distr <- rbinom(num_repl, sample_size/2, base_rate)/(sample_size/2)
     useless_feature_distr <- rbinom(num_repl, sample_size/2, base_rate)/(sample_size/2)
     super_feature_distr <- rbinom(num_repl, sample_size/2, effect_rate)/(sample_size/2)
@@ -53,10 +55,10 @@ plotUselessFeature <- function(dt_useless_feature, criticalValue = critical_valu
                          arrow = arrow(length=unit(0.30, "cm"), ends = "both", type = "closed")) +
         annotate("text", x = (effect_rate - base_rate)/2, y = 15, label = "Measured Effect", vjust = -1) +
         ggtitle("Distribution of Detectable Effects when there is actually no difference in open rates",
-                subtitle = glue('n = {format(n, scientific = FALSE, big.mark = ",")}'))
+                subtitle = glue('n = {format(num_contact, scientific = FALSE, big.mark = ",")}'))
 }
 
-plotUselessAndSuperFeature <- function(dt_useless_and_super_feature, criticalValue = critical_value, base_rate = p, effect_rate = p_effect){
+plotUselessAndSuperFeature <- function(dt_useless_and_super_feature, criticalValue = critical_value, base_rate = p, effect_rate = p_effect, num_contact = n){
     ggplot() +
         geom_density(data = dt_useless_and_super_feature, 
             aes(x = value, fill = variable, color = variable), alpha = 0.5) +
@@ -76,5 +78,5 @@ plotUselessAndSuperFeature <- function(dt_useless_and_super_feature, criticalVal
                          arrow = arrow(length=unit(0.30, "cm"), ends = "both", type = "closed")) +
         annotate("text", x = (effect_rate - base_rate)/2, y = 15, label = "Measured Effect", vjust = -1) +
         ggtitle("Distribution of Detectable Effects",
-                subtitle = glue('n = {format(n, scientific = FALSE, big.mark = ",")}'))
+                subtitle = glue('n = {format(num_contact, scientific = FALSE, big.mark = ",")}'))
 }
