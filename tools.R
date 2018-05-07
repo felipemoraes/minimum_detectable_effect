@@ -32,7 +32,7 @@ plotDetectableEffects <- function(dt_useless_feature, num_contact = n) {
               axis.ticks.y = element_blank(),
               legend.position = "none") + 
         geom_vline(xintercept = 0, color = "darkgreen", linetype = "dashed") +
-        ggtitle("Distribution of Detectable Effects when there is actually no difference in open rates",
+        ggtitle("Distribution of Detectable Effects",
                 subtitle = glue('n = {format(num_contact, scientific = FALSE, big.mark = ",")}'))
 }
 
