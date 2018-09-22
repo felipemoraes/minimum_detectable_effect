@@ -54,7 +54,7 @@ plotUselessFeature <- function(dt_useless_feature, criticalValue = critical_valu
         geom_segment(aes(x = 0, xend = effect_rate - base_rate, y = 15, yend = 15),
                          arrow = arrow(length=unit(0.30, "cm"), ends = "both", type = "closed")) +
         annotate("text", x = (effect_rate - base_rate)/2, y = 15, label = "Measured Effect", vjust = -1) +
-        ggtitle("Distribution of Detectable Effects when there is actually no difference in open rates",
+        ggtitle("Distribution of Detectable Effects when there is \nactually no difference in open rates",
                 subtitle = glue('n = {format(num_contact, scientific = FALSE, big.mark = ",")}'))
 }
 
