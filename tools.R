@@ -1,13 +1,13 @@
-createDetecteableEffectsForFeatures <- function(base_rate = p, effect_rate = p_effect, sample_size = n, num_repl = n_rep, seed = 123) {
+createDetecteableEffectsForExperiments <- function(base_rate = p, effect_rate = p_effect, sample_size = n, num_repl = n_rep, seed = 123) {
     set.seed(seed)
 
     base_rate_distr <- rbinom(num_repl, sample_size/2, base_rate)/(sample_size/2)
-    useless_feature_distr <- rbinom(num_repl, sample_size/2, base_rate)/(sample_size/2)
-    super_feature_distr <- rbinom(num_repl, sample_size/2, effect_rate)/(sample_size/2)
+    inconclusive_experiment_distr <- rbinom(num_repl, sample_size/2, base_rate)/(sample_size/2)
+    conclusive_experiment_distr <- rbinom(num_repl, sample_size/2, effect_rate)/(sample_size/2)
 
-    data.table(useless_feature = useless_feature_distr - base_rate_distr,
-               super_feature = super_feature_distr - base_rate_distr) %>% 
-        melt(measure.vars = c("useless_feature", "super_feature"))
+    data.table(inconclusive_experiment = inconclusive_experiment_distr - base_rate_distr,
+               conclusive_experiment = conclusive_experiment_distr - base_rate_distr) %>% 
+        melt(measure.vars = c("inconclusive_experiment", "conclusive_experiment"))
 }
 
 calculateMinimumDetectableEffect <- function(p1, n, prop_of_treatment = 0.5, alpha = 0.05, beta = 0.2) {
@@ -17,17 +17,17 @@ calculateMinimumDetectableEffect <- function(p1, n, prop_of_treatment = 0.5, alp
     M * sqrt(variance / weight)
 }
 
-calculateCriticalValue <- function(dt_useless_and_super_feature) {
-    dt_useless_and_super_feature[variable == "useless_feature", quantile(value, 1 - alpha/2)]
+calculateCriticalValue <- function(dt_inconclusive_and_conclusive_experiment) {
+    dt_inconclusive_and_conclusive_experiment[variable == "inconclusive_experiment", quantile(value, 1 - alpha/2)]
 }
 
-plotDetectableEffects <- function(dt_useless_feature, num_contact = n) {
+plotDetectableEffects <- function(dt_inconclusive_experiment, num_contact = n) {
     ggplot() + 
-        geom_density(data = dt_useless_feature, 
+        geom_density(data = dt_inconclusive_experiment, 
             aes(x = value, alpha = 0.5), 
             color = "lightgreen", fill = "lightgreen") + 
         scale_x_continuous(labels = scales::percent, breaks = seq(-0.02, 0.04, 0.01)) +
-        labs(x = "open rate difference (%)", y = NULL, fill = NULL) + 
+        labs(x = "booking rate difference (%)", y = NULL, fill = NULL) + 
         theme(axis.text.y = element_blank(),
               axis.ticks.y = element_blank(),
               legend.position = "none") + 
@@ -36,13 +36,13 @@ plotDetectableEffects <- function(dt_useless_feature, num_contact = n) {
                 subtitle = glue('n = {format(num_contact, scientific = FALSE, big.mark = ",")}'))
 }
 
-plotUselessFeature <- function(dt_useless_feature, criticalValue = critical_value, base_rate = p, effect_rate = p_effect, num_contact = n) {
+plotinconclusiveexperiment <- function(dt_inconclusive_experiment, criticalValue = critical_value, base_rate = p, effect_rate = p_effect, num_contact = n) {
     ggplot() + 
-        geom_density(data = dt_useless_feature, 
+        geom_density(data = dt_inconclusive_experiment, 
             aes(x = value, alpha = 0.5), 
             color = "lightgreen", fill = "lightgreen") + 
         scale_x_continuous(labels = scales::percent, breaks = seq(-0.02, 0.04, 0.01)) +
-        labs(x = "open rate difference (%)", y = NULL, fill = NULL) + 
+        labs(x = "booking rate difference (%)", y = NULL, fill = NULL) + 
         theme(axis.text.y = element_blank(),
               axis.ticks.y = element_blank(),
               legend.position = "none") + 
@@ -54,19 +54,19 @@ plotUselessFeature <- function(dt_useless_feature, criticalValue = critical_valu
         geom_segment(aes(x = 0, xend = effect_rate - base_rate, y = 15, yend = 15),
                          arrow = arrow(length=unit(0.30, "cm"), ends = "both", type = "closed")) +
         annotate("text", x = (effect_rate - base_rate)/2, y = 15, label = "Measured Effect", vjust = -1) +
-        ggtitle("Distribution of Detectable Effects when there is \nactually no difference in open rates",
+        ggtitle("Distribution of Detectable Effects when there is \nactually no difference in booking rates",
                 subtitle = glue('n = {format(num_contact, scientific = FALSE, big.mark = ",")}'))
 }
 
-plotUselessAndSuperFeature <- function(dt_useless_and_super_feature, criticalValue = critical_value, base_rate = p, effect_rate = p_effect, num_contact = n){
+plotinconclusiveAndconclusiveExperiment <- function(dt_inconclusive_and_conclusive_experiment, criticalValue = critical_value, base_rate = p, effect_rate = p_effect, num_contact = n){
     ggplot() +
-        geom_density(data = dt_useless_and_super_feature, 
+        geom_density(data = dt_inconclusive_and_conclusive_experiment, 
             aes(x = value, fill = variable, color = variable), alpha = 0.5) +
         scale_fill_manual(values = c("lightgreen", "lightblue"), 
-                          labels = c("useless feature", "super feature")) +
+                          labels = c("inconclusive experiment", "conclusive experiment")) +
         scale_color_manual(values = c("lightgreen", "lightblue"), guide = FALSE) +
         scale_x_continuous(labels = scales::percent, breaks = seq(-0.02, 0.04, 0.01)) +
-        labs(x = "open rate difference (%)", y = NULL, fill = NULL) + 
+        labs(x = "booking rate difference (%)", y = NULL, fill = NULL) + 
         theme(axis.text.y = element_blank(),
               axis.ticks.y = element_blank()) + 
         geom_vline(xintercept = 0, color = "darkgreen", linetype = "dashed") + 
