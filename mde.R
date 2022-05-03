@@ -18,7 +18,7 @@ beta <- 0.2
 
 # plot effects ------------------------------------------------------------
 
-dt_useless_and_super_feature <- createDetecteableEffectsForExperiments()
+dt_inconclusive_and_conclusive_experiment <- createDetecteableEffectsForExperiments()
 critical_value <- calculateCriticalValue(dt_useless_and_super_feature)
 
 plotDetectableEffects(dt_inconclusive_and_conclusive_experiment[variable == "inconclusive_experiment"])
