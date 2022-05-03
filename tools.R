@@ -58,7 +58,7 @@ plotInconclusiveExperiment <- function(dt_inconclusive_experiment, criticalValue
                 subtitle = glue('n = {format(num_contact, scientific = FALSE, big.mark = ",")}'))
 }
 
-plotInconclusiveAndConlusiveExperiment <- function(dt_inconclusive_and_conclusive_experiment, criticalValue = critical_value, base_rate = p, effect_rate = p_effect, num_contact = n){
+plotInconclusiveAndConclusiveExperiment <- function(dt_inconclusive_and_conclusive_experiment, criticalValue = critical_value, base_rate = p, effect_rate = p_effect, num_contact = n){
     ggplot() +
         geom_density(data = dt_inconclusive_and_conclusive_experiment, 
             aes(x = value, fill = variable, color = variable), alpha = 0.5) +
