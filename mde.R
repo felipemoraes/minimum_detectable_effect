@@ -18,14 +18,14 @@ beta <- 0.2
 
 # plot effects ------------------------------------------------------------
 
-dt_useless_and_super_feature <- createDetecteableEffectsForFeatures()
+dt_useless_and_super_feature <- createDetecteableEffectsForExperiments()
 critical_value <- calculateCriticalValue(dt_useless_and_super_feature)
 
-plotDetectableEffects(dt_useless_and_super_feature[variable == "useless_feature"])
+plotDetectableEffects(dt_inconclusive_and_conclusive_experiment[variable == "inconclusive_experiment"])
 
-plotUselessFeature(dt_useless_and_super_feature[variable == "useless_feature"])
+plotInconclusiveExperiment(dt_inconclusive_and_conclusive_experiment[variable == "conclusive_experiment"])
 
-plotUselessAndSuperFeature(dt_useless_and_super_feature)
+plotInconclusiveAndConclusiveExperiment(dt_inconclusive_and_conclusive_experiment)
 
 calculateMinimumDetectableEffect(p, n, alpha = alpha, beta = beta)
 
@@ -39,7 +39,7 @@ ggplot(mde_dist, aes(x = n, y = MDE)) +
 	scale_x_continuous(labels = scales::comma) +
 	scale_y_continuous(labels = scales::percent) +
 	labs(title = "Distribution of MDE given different sample sizes",
-		 subtitle = glue("When base rate is {p * 100}%, with {(1 - alpha) * 100}% significance level and {(1 - beta) * 100}% power"),
+		 subtitle = glue("When booking rate is {p * 100}%, with {(1 - alpha) * 100}% significance level and {(1 - beta) * 100}% power"),
 		 x = "sample size", y = "Minimum Detectable Effect (%)")
 
 
@@ -47,16 +47,15 @@ ggplot(mde_dist, aes(x = n, y = MDE)) +
 
 n <- 30000
 
-dt_useless_and_super_feature <- createDetecteableEffectsForFeatures(sample_size = n)
-critical_value <- calculateCriticalValue(dt_useless_and_super_feature)
+dt_useless_and_super_feature <- createDetecteableEffectsForExperiments(sample_size = n)
+critical_value <- calculateCriticalValue(dt_inconclusive_and_conclusive_experiment)
 
-plotUselessAndSuperFeature(dt_useless_and_super_feature)
+plotInconclusiveAndConclusiveExperiment(dt_inconclusive_and_conclusive_experiment)
 
 
 n <- 200000
 
-dt_useless_and_super_feature <- createDetecteableEffectsForFeatures(sample_size = n)
-critical_value <- calculateCriticalValue(dt_useless_and_super_feature)
+dt_useless_and_super_feature <- createDetecteableEffectsForExperiments(sample_size = n)
+critical_value <- calculateCriticalValue(plotInconclusiveAndConclusiveExperiment)
 
-plotUselessAndSuperFeature(dt_useless_and_super_feature)
-
+plotInconclusiveAndConclusiveExperiment(dt_inconclusive_and_conclusive_experiment)
