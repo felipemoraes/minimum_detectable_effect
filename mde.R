@@ -23,7 +23,7 @@ critical_value <- calculateCriticalValue(dt_useless_and_super_feature)
 
 plotDetectableEffects(dt_inconclusive_and_conclusive_experiment[variable == "inconclusive_experiment"])
 
-plotInconclusiveExperiment(dt_inconclusive_and_conclusive_experiment[variable == "conclusive_experiment"])
+plotInconclusiveExperiment(dt_inconclusive_and_conclusive_experiment[variable == "inconclusive_experiment"])
 
 plotInconclusiveAndConclusiveExperiment(dt_inconclusive_and_conclusive_experiment)
 
