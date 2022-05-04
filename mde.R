@@ -47,7 +47,7 @@ ggplot(mde_dist, aes(x = n, y = MDE)) +
 
 n <- 30000
 
-dt_useless_and_super_feature <- createDetecteableEffectsForExperiments(sample_size = n)
+dt_inconclusive_and_conclusive_experiment <- createDetecteableEffectsForExperiments(sample_size = n)
 critical_value <- calculateCriticalValue(dt_inconclusive_and_conclusive_experiment)
 
 plotInconclusiveAndConclusiveExperiment(dt_inconclusive_and_conclusive_experiment)
@@ -55,7 +55,7 @@ plotInconclusiveAndConclusiveExperiment(dt_inconclusive_and_conclusive_experimen
 
 n <- 200000
 
-dt_useless_and_super_feature <- createDetecteableEffectsForExperiments(sample_size = n)
+dt_inconclusive_and_conclusive_experiment <- createDetecteableEffectsForExperiments(sample_size = n)
 critical_value <- calculateCriticalValue(plotInconclusiveAndConclusiveExperiment)
 
 plotInconclusiveAndConclusiveExperiment(dt_inconclusive_and_conclusive_experiment)
